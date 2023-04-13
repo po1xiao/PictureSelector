@@ -55,6 +55,7 @@ public class PictureSelectorSupporterActivity extends AppCompatActivity {
     }
 
     private void immersive() {
+        if (selectorConfig == null) return;
         SelectMainStyle mainStyle = selectorConfig.selectorStyle.getSelectMainStyle();
         int statusBarColor = mainStyle.getStatusBarColor();
         int navigationBarColor = mainStyle.getNavigationBarColor();
@@ -77,7 +78,7 @@ public class PictureSelectorSupporterActivity extends AppCompatActivity {
      * set app language
      */
     public void initAppLanguage() {
-        if (selectorConfig.language != LanguageConfig.UNKNOWN_LANGUAGE && !selectorConfig.isOnlyCamera) {
+        if (selectorConfig != null && selectorConfig.language != LanguageConfig.UNKNOWN_LANGUAGE && !selectorConfig.isOnlyCamera) {
             PictureLanguageUtils.setAppLanguage(this, selectorConfig.language, selectorConfig.defaultLanguage);
         }
     }
@@ -90,14 +91,20 @@ public class PictureSelectorSupporterActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(PictureContextWrapper.wrap(newBase,
-                SelectorProviders.getInstance().getSelectorConfig().language, SelectorProviders.getInstance().getSelectorConfig().defaultLanguage));
+        SelectorConfig config = SelectorProviders.getInstance().getSelectorConfig();
+        if (config != null) {
+            super.attachBaseContext(PictureContextWrapper.wrap(newBase, config.language, config.defaultLanguage));
+        } else {
+            super.attachBaseContext(newBase);
+        }
     }
 
     @Override
     public void finish() {
         super.finish();
-        PictureWindowAnimationStyle windowAnimationStyle = selectorConfig.selectorStyle.getWindowAnimationStyle();
-        overridePendingTransition(0, windowAnimationStyle.activityExitAnimation);
+        if (selectorConfig != null) {
+            PictureWindowAnimationStyle windowAnimationStyle = selectorConfig.selectorStyle.getWindowAnimationStyle();
+            overridePendingTransition(0, windowAnimationStyle.activityExitAnimation);
+        }
     }
 }
